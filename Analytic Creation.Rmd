@@ -39,8 +39,8 @@ library(plotly)
 
 ## Load CSV
 ```{r}
-setwd("C:/Users/hubshmz/Documents/Code/git/data")  # FORBOW computer
-# setwd("C:/Users/zachh/Documents/Code/git/Data")  # Laptop
+# setwd("C:/Users/hubshmz/Documents/Code/git/data")  # FORBOW computer
+setwd("C:/Users/zachh/Documents/Code/git/Data")  # Laptop
 # setwd("C:/Users/zacha/Documents/RStudio/forbow/git/Data/ESCAP") # Tupper Windows Comp
 # setwd("C:/Users/zacha/Documents/forbow/code/git") # Home Computer
 
@@ -82,18 +82,76 @@ FOR_P <- FOR_P %>%
   ungroup()
 
 
-#Pure exploratory to see what kind of group combos we have 
-fid_groups <- FOR_P %>%
-  distinct(fid, group) %>%
-  group_by(fid) %>%
-  summarise(groups = list(sort(unique(group))), .groups = "drop")
-fid_groups <- fid_groups %>%
-  mutate(group_combo = sapply(groups, paste, collapse = "-"))
-combo_summary <- fid_groups %>%
-  count(group_combo) %>%
-  arrange(desc(n))
+table(FOR_P$medul)
 
-print(combo_summary)
+fid_group_list <- FOR_P %>%
+  group_by(fid) %>%
+  summarise(
+    group = if (all(is.na(group))) NA_real_ else max(group, na.rm = TRUE),
+    medul_parent = if (all(is.na(medul))) NA_real_ else max(medul, na.rm = TRUE),
+    fedul_parent = if (all(is.na(fedul))) NA_real_ else max(fedul, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+#Join back into full data set
+FOR <- FOR %>%
+  left_join(fid_group_list, by = "fid")
+```
+
+#Demographic Information
+
+###Sex/Age
+```{R}
+FOR <- FOR %>%
+  group_by(subject_id) %>%
+  mutate(dob = dob[which(is.na(time_point))][1]) %>%
+  ungroup()
+FOR <- FOR %>%
+  group_by(subject_id) %>%
+  mutate(sex = sex[which(is.na(time_point))][1]) %>%
+  ungroup()
+FOR <- FOR %>%
+  mutate(sex = case_when(
+    sex == 1 ~ 0,
+    sex == 2 ~ 1
+  ))
+FOR <- FOR %>%
+  group_by(subject_id) %>%
+  filter(all(!is.na(dob) & dob != "")) %>%  # Keep only groups where *all* dob are not missing or empty
+  ungroup()
+invalid_si <- c("9999999888", "9999999998")
+FOR <- FOR %>%
+  filter(!subject_id %in% invalid_si)
+
+FOR$assessment_date <- as.Date(FOR$assessment_date)
+FOR$dob <- as.Date(FOR$dob)
+FOR$age_days <- FOR$assessment_date - FOR$dob
+FOR$age <- as.numeric(FOR$age_days) / 365.25
+```
+
+
+###SES
+```{r}
+library(dplyr)
+
+FOR <- FOR %>%
+  mutate(
+    # initialize SES domain flags
+    sesmedul   = as.integer(medul_parent   > 2.5 & medul_parent   < 9),
+    sesfedul   = as.integer(fedul_parent   > 2.5 & fedul_parent   < 9),
+    sesown     = as.integer(oresown == 1),
+    sesincome  = as.integer(oincome > 3.5 & oincome < 9),
+
+    # correct the 43 coding error in household rooms
+    ohomerooms = ifelse(ohomerooms == 43, 3, ohomerooms),
+
+    # bedrooms-to-person ratio
+    bpratio    = ohomerooms / ohousepers,
+    sesbpratio = as.integer(bpratio > 0.9 & bpratio < 9),
+
+    # total SES
+    ses = sesmedul + sesfedul + sesown + sesincome + sesbpratio
+  )
 ```
 
 #Dimension Creation
@@ -146,32 +204,6 @@ FOR <- FOR %>%
 FOR <- FOR %>%
   # SCAS dimanx
   mutate(dimanx = rowMeans(across(c(Scas_C_z, Scas_P_z, Scared_C_Total_z, Scared_P_Total_z)), na.rm = TRUE)) 
-
-FOR <- FOR %>%
-  group_by(subject_id) %>%
-  mutate(dob = dob[which(is.na(time_point))][1]) %>%
-  ungroup()
-FOR <- FOR %>%
-  group_by(subject_id) %>%
-  mutate(sex = sex[which(is.na(time_point))][1]) %>%
-  ungroup()
-FOR <- FOR %>%
-  mutate(sex = case_when(
-    sex == 1 ~ 0,
-    sex == 2 ~ 1
-  ))
-FOR <- FOR %>%
-  group_by(subject_id) %>%
-  filter(all(!is.na(dob) & dob != "")) %>%  # Keep only groups where *all* dob are not missing or empty
-  ungroup()
-invalid_si <- c("9999999888", "9999999998")
-FOR <- FOR %>%
-  filter(!subject_id %in% invalid_si)
-
-FOR$assessment_date <- as.Date(FOR$assessment_date)
-FOR$dob <- as.Date(FOR$dob)
-FOR$age_days <- FOR$assessment_date - FOR$dob
-FOR$age <- as.numeric(FOR$age_days) / 365.25
 ```
 
 ###Dimension Depression
@@ -179,9 +211,159 @@ FOR$age <- as.numeric(FOR$age_days) / 365.25
 
 ```
 
-#Malt
+#Maltretmeant/Bullying
+
+###Malt variables
+Rudolf has ceca/jvq valid for malt creation... isn't in redcap though so unsure
 ```{r}
-print('hello')
+library(dplyr)
+
+##Creating Maltreatment Variables
+FOR <- FOR %>%
+  mutate(
+    ## Physical maltreatment
+    maltp = as.integer(
+      rowSums(across(c(jvq10_cv, jvq10_pv,
+                      jvq11_cv, jvq11_pv),
+                     ~ . == 2), na.rm = TRUE) > 0
+    ),
+    ## Emotional maltreatment
+    malte = as.integer(
+      rowSums(across(c(jvq12_cv, jvq12_pv),
+                     ~ . == 2), na.rm = TRUE) > 0 |
+      cecatorment11 == 1
+    ),
+    ## Neglect
+    maltn = as.integer(
+      rowSums(across(c(jvq13_cv, jvq13_pv,
+                      jvq41_cv, jvq41_pv,
+                      jvq42_cv, jvq42_pv,
+                      jvq43_cv, jvq43_pv,
+                      jvq44_cv, jvq44_pv,
+                      jvq45_cv, jvq45_pv),
+                     ~ . == 2), na.rm = TRUE) > 0 |
+      cecabasneed11 == 1 |
+      cecabasneed16 == 1
+    ),
+    ## Custody disruption
+    custodydisp = as.integer(
+      rowSums(across(c(jvq14_cv, jvq14_pv), ~ . == 2), na.rm = TRUE) > 0
+    ),
+    ## Sexual maltreatment
+    malts = as.integer(
+      rowSums(across(c(jvq25_cv, jvq25_pv,
+                      jvq26_cv, jvq26_pv,
+                      jvq28_cv, jvq28_pv),
+                     ~ . == 2), na.rm = TRUE) > 0 |
+      cecaunwsex11 == 1 |
+      cecaunwsex16 == 1
+    ),
+
+    ## Violence exposure
+    maltv = as.integer(
+      rowSums(across(c(jvq32_cv, jvq32_pv,
+                      jvq33_cv, jvq33_pv,
+                      jvq34_cv, jvq34_pv,
+                      jvq35_cv, jvq35_pv,
+                      jvq36_cv, jvq36_pv,
+                      jvq37_cv, jvq37_pv),
+                     ~ . == 2), na.rm = TRUE) > 0 |
+      cecafreqarg11 == 1 |
+      cecafreqarg16 == 1
+    )
+  )
+
+
+
+##Overall maltreatment at that visit
+FOR <- FOR %>%
+  mutate(
+    malt = as.integer(maltp == 1 | malte == 1 | malts == 1 | maltn == 1),
+    #Have malt include violence too
+    bmalt = as.integer(malt == 1 | maltv == 1)
+  )
+
+
+##Create the lifetime maltreatment variable
+FOR <- FOR %>%
+  group_by(subject_id) %>%
+  mutate(
+    ## malt subtype lifetime
+    maltp_ever = as.integer(any(maltp == 1, na.rm = TRUE)),
+    malte_ever = as.integer(any(malte == 1, na.rm = TRUE)),
+    maltn_ever = as.integer(any(maltn == 1, na.rm = TRUE)),
+    malts_ever = as.integer(any(malts == 1, na.rm = TRUE)),
+    maltv_ever = as.integer(any(maltv == 1, na.rm = TRUE)),
+    custody_ever = as.integer(any(custodydisp == 1, na.rm = TRUE)),
+
+    ## overall malt (physical, emotional, neglect, sexual)
+    malt_ever = as.integer(
+      any(maltp == 1 | malte == 1 | malts == 1 | maltn == 1, na.rm = TRUE)
+    ),
+
+    ## broadened malt including violence
+    bmalt_ever = as.integer(
+      any(maltp == 1 | malte == 1 | malts == 1 | maltn == 1 | maltv == 1, na.rm = TRUE)
+    )
+  ) %>%
+  ungroup()
+```
+
+###Bully
+Generates bullying_ever. Which finds out if someone hsa either previously or currently is experiencing bullying.
+```{r}
+FOR <- FOR %>%
+  mutate(
+    bullying = case_when(
+      obully == 4 ~ 1L,
+      obully == 3 ~ 1L,
+      obully == 2 & obullserv %in% c(3, 4) ~ 1L,
+      obully > 4.5 ~ NA_integer_,
+      age < 4.99 ~ NA_integer_,
+      TRUE ~ 0L
+    )
+  )
+
+##This fidns if someone previously was bullied
+FOR <- FOR %>%
+  arrange(subject_id, time_point) %>%
+  group_by(subject_id) %>%
+  mutate(bullying_ever = cummax(replace(bullying, is.na(bullying), 0))) %>%
+  ungroup()
+```
+
+###Adveristy
+Creates adversity measure. If an individual was bullied, has experiened maltreatment, or a custody dispute, then they get adversity as 1.
+```{r}
+FOR <- FOR %>%
+  mutate(
+    adversity = case_when(
+      malt > 9 | bullying > 9 ~ NA_integer_,
+      bmalt == 1 | custodydisp == 1 | bullying == 1 ~ 1L,
+      TRUE ~ 0L
+    )
+  )
+```
+
+###Polye
+```{r}
+FOR <- FOR %>%
+  mutate(
+    rsesmedul    = ifelse(sesmedul == 1, 0L, ifelse(sesmedul == 0, 1L, NA_integer_)),
+    rsesfedul    = ifelse(sesfedul == 1, 0L, ifelse(sesfedul == 0, 1L, NA_integer_)),
+    rsesown      = ifelse(sesown == 1, 0L, ifelse(sesown == 0, 1L, NA_integer_)),
+    rsesincome   = ifelse(sesincome == 1, 0L, ifelse(sesincome == 0, 1L, NA_integer_)),
+    rsesbpratio  = ifelse(sesbpratio == 1, 0L, ifelse(sesbpratio == 0, 1L, NA_integer_))
+  )
+
+FOR <- FOR %>%
+  mutate(
+    polye = rowMeans(
+      cbind(malts, maltp, malte, maltn, maltv, bullying,
+            rsesmedul, rsesfedul, rsesown, rsesincome),
+      na.rm = TRUE
+    )
+  )
 ```
 
 #Diagnosis
@@ -678,22 +860,6 @@ FOR <- FOR %>%
 
 ##Consesus Lifetime Diagnosis
 ```
-
-
-```{R}
-FOR$round_age <- round(FOR$age)
-
-table(FOR$round_age, FOR$ccMDD)
-
-fid_group_list <- FOR_P %>%
-  group_by(fid) %>%
-  summarise(group = max(group, na.rm = TRUE), .groups = "drop")
-# Step 2: Join back to the full FOR dataset
-FOR <- FOR %>%
-  left_join(fid_group_list, by = "fid")
-table(FOR$group)
-```
-
 
 # Create my analytic now.
 ```{r}
