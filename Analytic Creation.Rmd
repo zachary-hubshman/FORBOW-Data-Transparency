@@ -324,6 +324,16 @@ FOR <- FOR %>%
     )
   )
 
+FOR <- FOR %>%
+  mutate(
+    cyber = case_when(
+      ocyber1 > 1.5 & ocyber1 < 8 ~ 1L,
+      ocyber2 > 1.5 & ocyber2 < 8 ~ 1L,
+      ocyber3 > 1.5 & ocyber3 < 8 ~ 1L,
+      TRUE ~ 0L
+    )
+  )
+
 ##This fidns if someone previously was bullied
 FOR <- FOR %>%
   arrange(subject_id, time_point) %>%
@@ -356,13 +366,14 @@ FOR <- FOR %>%
     rsesbpratio  = ifelse(sesbpratio == 1, 0L, ifelse(sesbpratio == 0, 1L, NA_integer_))
   )
 
-FOR <- FOR %>%
+FOR <- FOR %>% 
   mutate(
-    polye = rowMeans(
-      cbind(malts, maltp, malte, maltn, maltv, bullying,
-            rsesmedul, rsesfedul, rsesown, rsesincome),
-      na.rm = TRUE
-    )
+    polye      = rowMeans(across(c(malts, maltp, malte, maltn, maltv, bullying, rsesmedul, rsesfedul, rsesown, rsesincome)), na.rm = TRUE),
+    polyvicte  = rowMeans(across(c(malts, maltp, malte, maltn, maltv, bullying)), na.rm = TRUE),
+    polysese   = rowMeans(across(c(rsesmedul, rsesfedul, rsesown, rsesincome)), na.rm = TRUE),
+    polyv      = rowMeans(across(c(malts, maltp, malte, maltn, maltv, bullying, cyber)), na.rm = TRUE),
+    c4polyv    = case_when(polyv > 3.5 & polyv < 9 ~ 1L, TRUE ~ 0L),
+    zpolye     = (polye - mean(polye, na.rm = TRUE)) / sd(polye, na.rm = TRUE)
   )
 ```
 
