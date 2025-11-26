@@ -7,7 +7,16 @@ There are many things this does not do, I have listed the plan for things to do 
 To-Do List:
 - Fix lifetime diagnosis so it is consesus.
 - Add in the different dimension variables
-- Add in poly e variable.
-- Add in maltreatment.
 - Add in even more parent diagnosis
+
+
+Things I've Done
+- Poly e variable.
+- Maltreatment
+- Bullying
+- SES Information
+- Concurrent diagnosis
+- prospective onset
+
+  
 
