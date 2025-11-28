@@ -1,0 +1,44 @@
+---
+title: "Main File for Variable Creation"
+output: html_document
+date: "2025-11-28"
+---
+This file is made so that you can create the specific variables you need without having to run an entire script that makes everything. This should output exactly what you need for your analysis. 
+---
+#
+## Library
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+library(haven); library(dplyr); library(tidyr); library(readr); library(readxl); library(data.table); library(stringr); library(purrr)  # Data manipulation & import
+library(fuzzyjoin)  # Joins
+```
+
+#Load Dataset
+Wont work without loading dataset. Go to redcap and pull "ZACH FORBOW Report." Then rename the file so it matches the one below. 
+
+Ensure your WD is set to where you are storing the dataset. 
+```{r}
+setwd("C:/Users/hubshmz/Documents/Code/git/data")  # FORBOW computer
+# setwd("C:/Users/zachh/Documents/Code/git/Data")  # Laptop
+# setwd("C:/Users/zacha/Documents/RStudio/forbow/git/Data/ESCAP") # Tupper Windows Comp
+# setwd("C:/Users/zacha/Documents/forbow/code/git") # Home Computer
+
+##Do unlabeled, ZACH FORBOW report from the master database. 
+FOR <- read.csv("FORBOWMasterDatabase.csv", header=TRUE, fileEncoding="latin1")
+```
+
+
+#FHR & Group
+This creates FHR & Group Variable
+
+TO-DO: Have this also create other parent diagnosis variables
+```{r}
+source("scripts/Family_Risk_And_Group_Creation.R")
+table(FOR$group)
+```
+
+#Demographic Variables
+```{r}
+
+
+```

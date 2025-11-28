@@ -99,7 +99,6 @@ FOR <- FOR %>%
 ```
 
 #Demographic Information
-
 ###Sex/Age
 ```{R}
 FOR <- FOR %>%
