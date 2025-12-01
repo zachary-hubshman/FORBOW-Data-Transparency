@@ -35,6 +35,8 @@ TO-DO: Have this also create other parent diagnosis variables
 ```{r}
 source("scripts/Family_Risk_And_Group_Creation.R")
 table(FOR$group)
+
+store1 <- c('group', 'fhr')
 ```
 
 #Demographic Variables
