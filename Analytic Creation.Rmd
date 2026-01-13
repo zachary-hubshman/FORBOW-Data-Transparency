@@ -39,8 +39,8 @@ library(plotly)
 
 ## Load CSV
 ```{r}
-# setwd("C:/Users/hubshmz/Documents/Code/git/data")  # FORBOW computer
-setwd("C:/Users/zachh/Documents/Code/git/Data")  # Laptop
+setwd("C:/Users/hubshmz/Documents/Code/git/data")  # FORBOW computer
+# setwd("C:/Users/zachh/Documents/Code/git/Data")  # Laptop
 # setwd("C:/Users/zacha/Documents/RStudio/forbow/git/Data/ESCAP") # Tupper Windows Comp
 # setwd("C:/Users/zacha/Documents/forbow/code/git") # Home Computer
 
@@ -118,7 +118,7 @@ FOR <- FOR %>%
   group_by(subject_id) %>%
   filter(all(!is.na(dob) & dob != "")) %>%  # Keep only groups where *all* dob are not missing or empty
   ungroup()
-invalid_si <- c("9999999888", "9999999998")
+invalid_si <- c("9999999888", "9999999998", "8009999123")
 FOR <- FOR %>%
   filter(!subject_id %in% invalid_si)
 
@@ -151,6 +151,10 @@ FOR <- FOR %>%
     # total SES
     ses = sesmedul + sesfedul + sesown + sesincome + sesbpratio
   )
+```
+
+```{r}
+
 ```
 
 #Dimension Creation
