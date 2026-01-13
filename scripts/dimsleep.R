@@ -1,23 +1,13 @@
-egen dimsleep = rowmean(zpsqitotal zcshtot zssrtot zsshtot)
-
-*** correlation between sleep measures
-pwcorr dimsleep zpsqitotal zcshtot zssrtot zpsqidist zpsqilaten zpsqitotal zcshsleepbeh zcshwake zssrtot zsshtot psqidurat psqidistb psqilaten psqidaydys psqihse psqislpqual psqimeds cshbedresistance cshsleepbeh cshwake
-
-*** generate antecedent sleep
-capture drop antsleep
-gen antsleep = 0
-replace antsleep = 1 if ccSleep == 1
-* replace antsleep = 1 if clSleep == 1
-replace antsleep = 1 if zpsqitotal>0.99 & zpsqitotal<9.99
-replace antsleep = 1 if zcshtot>0.99 & zcshtot<9.99
-replace antsleep = 1 if zssrtot>0.99 & zssrtot<9.99
-replace antsleep = 1 if zsshtot>0.99 & zsshtot<9.99
-
+# egen dimsleep = rowmean(zpsqitotal zcshtot zssrtot zsshtot)
+# 
+# *** correlation between sleep measures
+# pwcorr dimsleep zpsqitotal zcshtot zssrtot zpsqidist zpsqilaten zpsqitotal zcshsleepbeh zcshwake zssrtot zsshtot psqidurat psqidistb psqilaten psqidaydys psqihse psqislpqual psqimeds cshbedresistance cshsleepbeh cshwake
+# 
 
 
 
 #dimsleep needs psqi, csh, ssr, and ssh
-egen zcshtot = rowmean(zcshsleepbeh zcshwake)
+
 
 
 library(dplyr)
@@ -165,15 +155,129 @@ FOR <- FOR %>%
            ~ suppressWarnings(as.numeric(as.character(.x))))
   )
 
+#A
+FOR <- FOR %>%
+  mutate(
+    q1_min = ifelse(is.na(psqi_1), NA_real_,
+                    (psqi_1 %/% 100) * 60 + (psqi_1 %% 100)),
+    q3_min = ifelse(is.na(psqi_3), NA_real_,
+                    (psqi_3 %/% 100) * 60 + (psqi_3 %% 100)),
+    
+    # signed difference (NOT abs)
+    Diffmin_signed = ifelse(is.na(q1_min) | is.na(q3_min),
+                            NA_real_,
+                            q3_min - q1_min),
+    
+    # if negative, add 24h in minutes
+    Diffmin = ifelse(is.na(Diffmin_signed),
+                     NA_real_,
+                     ifelse(Diffmin_signed < 0, Diffmin_signed + 1440, Diffmin_signed)),
+    
+    Diffhour = Diffmin / 60,
+    newtib   = Diffhour,
+    
+    # assuming psqi_4 is HOURS slept
+    tmphse = ifelse(is.na(psqi_4) | is.na(newtib) | newtib == 0,
+                    NA_real_,
+                    (psqi_4 / newtib) * 100)
+  )
+FOR <- FOR %>%
+  mutate(
+    psqihse = case_when(
+      is.na(tmphse)          ~ NA_real_,
+      tmphse > 85            ~ 0,
+      tmphse <= 85 & tmphse > 75 ~ 1,
+      tmphse <= 75 & tmphse > 65 ~ 2,
+      tmphse <= 65           ~ 3
+    )
+  )
 
-#Sleep Quality
-
-#Medicine 
-
-egen psqitotal = rowtotal(psqidurat psqidistb psqilaten psqidaydys psqihse psqislpqual psqimeds), missing
 
 
+#Sleep Quality and Medicine
+FOR <- FOR %>%
+  mutate(
+    psqislpqual = case_when(
+      is.na(psqi_6) ~ NA_real_,
+      TRUE ~ as.numeric(psqi_6)
+    ),
+    psqimeds = case_when(
+      is.na(psqi_7) ~ NA_real_,
+      TRUE ~ as.numeric(psqi_7)
+    )
+  )
+
+
+FOR$psqitotal <- rowSums(
+  FOR[, c("psqidurat",
+          "psqidistb",
+          "psqilaten",
+          "psqidaydys",
+          "psqihse",
+          "psqislpqual",
+          "psqimeds")]
+)
+
+FOR$zpsqitotal <- scale(FOR$psqitotal)
 
 #SSR
 
-#SSH
+
+
+##SSH
+#Some SSH need to be subctracted by one
+sub_SSH <- c("ssh15wake", "ssh19rate", "ssh20goodbad","ssh21reg",
+             "ssh24blate","ssh24cmorn","ssh24daft","ssh24ewoke",
+             "ssh24flate","ssh24gallnight","ssh24hnoon",
+             "ssh24itired","ssh24jalarm","ssh24kdiffic","ssh24lbaddre",
+             "ssh24mtobed","ssh24ndanger","ssh25bfall") 
+
+#Reverse coded SSH
+reverse_SSH <- c("ssh24ogoodsle", "ssh24asatis")
+
+
+FOR <- FOR %>%
+  mutate(
+    across(all_of(c(sub_SSH, reverse_SSH)),
+           ~ as.numeric(as.character(.x))))
+
+FOR <- FOR %>%
+  mutate(
+    # subtract-1 items
+    across(all_of(sub_SSH),
+           ~ case_when(
+             .x == 99           ~ NA_real_,
+             .x %in% 1:5       ~ .x - 1,
+             TRUE              ~ NA_real_
+           )
+    ),
+    
+    # reverse-coded items: 1..5 -> 4..0
+    across(all_of(reverse_SSH),
+           ~ case_when(
+             .x == 99          ~ NA_real_,
+             .x %in% 1:5      ~ 5 - .x,
+             TRUE             ~ NA_real_
+           )
+    )
+  )
+
+ssh24_sleepwakeproblems <- c("ssh24asatis","ssh24blate","ssh24cmorn",
+                 "ssh24daft","ssh24ewoke","ssh24flate",
+                 "ssh24gallnight","ssh24hnoon","ssh24itired",
+                 "ssh24jalarm","ssh24kdiffic","ssh24lbaddre",
+                 "ssh24mtobed","ssh24ndanger","ssh24ogoodsle")
+
+total_items <- c("ssh15wake","ssh19rate","ssh20goodbad",
+                 "ssh21reg", ssh24_sleepwakeproblems, "ssh25bfall")
+FOR <- FOR %>%
+  rowwise() %>%
+  mutate(
+    sshtotal = sum(c_across(all_of(total_items))),
+    sshtot   = sshtotal * 20
+  ) %>% 
+  ungroup()
+
+FOR$zsshtot <- scale(FOR$sshtot)
+
+table(FOR$zsshtot)

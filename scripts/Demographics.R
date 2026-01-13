@@ -8,10 +8,12 @@ FOR <- FOR %>%
 
 #Sex
 FOR <- FOR %>%
-  mutate(sex = case_when(
-    sex == 1 ~ 0,
-    sex == 2 ~ 1
-  ))
+  mutate(sex = recode(sex, `1` = 0, `2` = 1, .default = NA_real_)) %>%
+  group_by(subject_id) %>%
+  fill(sex, .direction = "downup") %>%
+  ungroup()
+
+
 
 #Race
 race_lookup <- FOR %>%

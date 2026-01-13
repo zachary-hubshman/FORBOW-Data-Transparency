@@ -96,7 +96,7 @@ source("scripts/maltreatmentandbullying.R")
 
 
 ####4.2 Dimension Variables
-dimbs, dimpsych, dimsleep, dimirrit, dimafflab
+dimbs, dimirrit, dimafflab
 #####4.2.1 Dimdep
 
 #####4.2.2 Dimanx
@@ -109,6 +109,8 @@ Missing CSHQ data = does not generate any CSH data.
 Geneates dim sleep - Made up of zCSH, zPSQI, zSSH, and zSSR scores.
 
 CODER NOTE: Working on PSQI: Need to fix SE
+------PSQI is extremely messy data.-----
+A LOT OF WRONG INPUTS ON PSQI
 
 #####4.2.4 Psych
 This requires something from rudolf, has to do with curated PLEs
@@ -120,11 +122,23 @@ source("scripts/dimdep.R")
 source("scripts/dimanx.R")
 
 #Dimension Sleep
+source("scripts/dimsleep.R")
 
-#Dimpsych
+#Dimension psych
+
+#Dimension affect Lability
+
+#Dimension irritability
+
+#Dimension Basic Symptom Antecedents? 
+
+
+
 ```
 
 ####4.3 Yeti Variables
+
+
 
 #10.0 Output
 ```{r}
