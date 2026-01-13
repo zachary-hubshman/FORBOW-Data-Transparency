@@ -1,25 +1,36 @@
+FOR <- FOR %>%
+  mutate(subject_id = as.character(subject_id)) %>%
+  filter(str_detect(subject_id, "^(\\d{10}|\\d{7}[MF][1-3])$"))
+invalid_si <- c("9999999888", "9999999998", "8009999123")
+FOR <- FOR %>%
+  filter(!subject_id %in% invalid_si)
+
+
 #Sex
-FOR <- FOR %>%
-  group_by(subject_id) %>%
-  mutate(dob = dob[which(is.na(time_point))][1]) %>%
-  ungroup()
-FOR <- FOR %>%
-  group_by(subject_id) %>%
-  mutate(sex = sex[which(is.na(time_point))][1]) %>%
-  ungroup()
 FOR <- FOR %>%
   mutate(sex = case_when(
     sex == 1 ~ 0,
     sex == 2 ~ 1
   ))
-FOR <- FOR %>%
-  group_by(subject_id) %>%
-  filter(all(!is.na(dob) & dob != "")) %>%  # Keep only groups where *all* dob are not missing or empty
-  ungroup()
 
-invalid_si <- c("9999999888", "9999999998")
+#Race
+race_lookup <- FOR %>%
+  filter(!is.na(race)) %>%
+  group_by(subject_id) %>%
+  summarise(
+    race_first = first(race),
+    .groups = "drop"
+  )
+
 FOR <- FOR %>%
-  filter(!subject_id %in% invalid_si)
+  left_join(race_lookup, by = "subject_id") %>%
+  mutate(
+    race = coalesce(race_first, race)
+  ) %>%
+  select(-race_first)
+remove(race_lookup)
+
+
 
 #Age
 FOR$assessment_date <- as.Date(FOR$assessment_date)
@@ -29,6 +40,9 @@ FOR$age <- as.numeric(FOR$age_days) / 365.25
 
 
 #SES
+FOR$ohomerooms <- as.numeric(FOR$ohomerooms)
+FOR$ohousepers <- as.numeric(FOR$ohousepers)
+
 FOR <- FOR %>%
   mutate(
     # initialize SES domain flags
@@ -51,6 +65,11 @@ FOR <- FOR %>%
 #PDS
 ##Female
 ###Menarche
+FOR$gcqfa_d2 <- as.numeric(FOR$gcqfa_d2) 
+FOR$gcqfa_d3 <- as.numeric(FOR$gcqfa_d3)
+FOR$gcqfp_d2 <- as.numeric(FOR$gcqfp_d2) 
+FOR$gcqfp_d3 <- as.numeric(FOR$gcqfp_d3)
+
 FOR <- FOR %>%
   arrange(subject_id, time_point) %>%
   mutate(
@@ -126,6 +145,8 @@ FOR <- FOR %>%
   )
 
 ###Puberty stage
+
+
 FOR <- FOR %>%
   mutate(
     puberty_pds = pmax(puberty_pds_fa, puberty_pds_fp, na.rm = TRUE)
@@ -147,6 +168,20 @@ FOR <- FOR %>%
   group_by(subject_id) %>%
   mutate(puberty_fw = cummax(puberty_pds)) %>%
   ungroup()
+
+
+
+#Biological family?
+FOR <- FOR %>%
+  mutate(
+    home_bio = if_else(
+      home_biomoth == 2 | home_biofath == 2,
+      1L,
+      0L,
+      missing = 0L
+    )
+  )
+
 
 
 

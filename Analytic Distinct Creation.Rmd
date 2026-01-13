@@ -11,6 +11,8 @@ This file is made so that you can create the specific variables you need without
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(haven); library(dplyr); library(tidyr); library(readr); library(readxl); library(data.table); library(stringr); library(purrr)  # Data manipulation & import
 library(fuzzyjoin)  # Joins
+
+library(zoo)
 ```
 
 #Load Dataset
@@ -18,18 +20,21 @@ Wont work without loading dataset. Go to redcap and pull "ZACH FORBOW Report." T
 
 Ensure your WD is set to where you are storing the dataset. 
 ```{r}
-setwd("C:/Users/hubshmz/Documents/Code/git/data")  # FORBOW computer
-# setwd("C:/Users/zachh/Documents/Code/git/Data")  # Laptop
+# setwd("C:/Users/hubshmz/Documents/Code/git/data")  # FORBOW computer
+setwd("C:/Users/zacha/OneDrive/Documents/Code/Data")  # Laptop
 # setwd("C:/Users/zacha/Documents/RStudio/forbow/git/Data/ESCAP") # Tupper Windows Comp
 # setwd("C:/Users/zacha/Documents/forbow/code/git") # Home Computer
 
 ##Do unlabeled, ZACH FORBOW report from the master database. 
-FOR <- read.csv("FORBOWMasterDatabase.csv", header=TRUE, fileEncoding="latin1")
+FOR <- read.csv("rawdataforanalysis2.csv", header=TRUE, fileEncoding="latin1")
 ```
 
 
 #FHR & Group
-This creates FHR & Group Variable
+This creates:
+- FHR: Defined as parental main diagnosis of MDD, BD, or schizophrenia
+- Group: 0 = Control, 1 = Parental diagnosis of MDD, 2  Parental Diagnosis of BD, 3 = Parent diagnosis of schiz
+
 
 TO-DO: Have this also create other parent diagnosis variables
 ```{r}
@@ -40,7 +45,115 @@ store1 <- c('group', 'fhr')
 ```
 
 #Demographic Variables
+This will create
+- Sex
+- Race
+- Age
+- SES
+- Pubertal Status (Only Females)
+- Whether a pt lives with bio family or not.
 ```{r}
+source("scripts/Demographics.R")
+```
 
+
+#Concurrent Diagnosis, Lifetime, and Hospital Diagnosises 
+This has three scripts. 
+- Concurrent CONFIRMED CONSESUS diagnosis for the diagnosis available in FORBOW. See the glossary at end for a list
+- Lifetime diagnosis diagnosis. This is generated from consesus confirmed diagnosises or from previous confirmed concurrent diagnosises. 
+- Hospital Diagnosises. These are diagnoses put in and generated itself.
+- Onset. Defined as having a concurrent confiremd diagnosis after baseline. 
+```{r}
+source("scripts/Concurrent Diagnosis.R")
+source("scripts/Lifetime Diagnosis.R")
+source("scripts/Hospital Diagnosis.R")
+source("scripts/Onset.R")
+```
+
+#Maltreatment and Bullying
+###Malt variables
+Rudolf has ceca/jvq valid for malt creation... isn't in redcap though so unsure
+
+This will generate:
+- PolyE 
+- Physical, emotional, neglect, custody disruption, sexual, and experienced violent maltreatment variables. 
+- Additional generates if any maltreatment was experienced
+```{r}
+source("scripts/maltreatmentandbullying.R")
+
+
+#Variables from this
+# polye, maltp, malte, maltn, custodydip, malts, maltv.
+# malt = experienced any maltp, e, n, or s
+# malt b = experienced any malt or maltv
+# There are also malt_ever variables, for if someone EVER experienced maltreatment
+
+# Bullying variables, obully, ocyber, and bullying_ever
+
+#Generates polye from adversity/ses info
+```
+
+
+#Dimension Variables
+```{r}
+#Dimension Depression
+source("scripts/dimdep.R")
+
+#dimension Anxiety
+source("scripts/dimanx.R")
 
 ```
+
+#Glossary
+##Diagnosises in FORBOW
+```{R}
+# 1 "Major Depressive Disorder" ///
+# 2 "Dysthymic Disorder" ///
+# 3 "Mood Disorder NOS" ///
+# 4 "Bipolar disorder I" ///
+# 5 "Bipolar disorder II" ///
+# 6 "Cyclothymic Disorder" ///
+# 7 "Bipolar disorder NOS" ///
+# 8 "Schizophrenia" ///
+# 9 "Schizoaffective" ///
+# 10 "Schizophreniform" ///
+# 11 "Delusional Disorder" ///
+# 12 "Brief Psychotic Disorder" ///
+# 13 "Psychotic Disorder NOS" ///
+# 14 "Psychotic disorder substance induced" ///
+# 15 "Separation Anxiety" ///
+# 16 "Specific Phobia" ///
+# 17 "Social Phobia" ///
+# 18 "Agoraphobia" ///
+# 19 "Panic disorder" ///
+# 20 "GAD" ///
+# 21 "OCD" ///
+# 22 "PTSD" ///
+# 23 "Acute Stress" ///
+# 24 "Anxiety Disorder NOS" ///
+# 25 "Panic Attack" ///
+# 26 "Enuresis" ///
+# 27 "Encopresis" ///
+# 28 "Anorexia Nervosa" ///
+# 29 "Bulimia" ///
+# 30 "Eating Disorder NOS" ///
+# 31 "ADHD Combined" ///
+# 32 "ADHD Inattentive" ///
+# 33 "ADHD Hyperactive-Imp" ///
+# 34 "ODD" ///
+# 35 "Conduct Disorder" ///
+# 36 "Tic Disorder Chronic" ///
+# 37 "Tic Disorder Transient" ///
+# 38 "Alcohol Abuse" ///
+# 39 "Alcohol Dependence" ///
+# 40 "Cannabis abuse" ///
+# 41 "Cannabis dependence" ///
+# 42 "Substance Abuse" ///
+# 43 "Substance Dependence" ///
+# 44 "Autistic Disorder" ///
+# 45 "Aspergers Disorder" ///
+# 46 "PDD NOS" ///
+# 98 "Other Disorder" ///
+# 99 "No response"
+```
+
