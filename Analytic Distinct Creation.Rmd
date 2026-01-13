@@ -5,32 +5,36 @@ date: "2025-11-28"
 ---
 This file is made so that you can create the specific variables you need without having to run an entire script that makes everything. This should output exactly what you need for your analysis. 
 ---
-#
-## Library
+#1. Setup ------------------------------
+###1.1 Library
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(haven); library(dplyr); library(tidyr); library(readr); library(readxl); library(data.table); library(stringr); library(purrr)  # Data manipulation & import
 library(fuzzyjoin)  # Joins
 
 library(zoo)
+library(lubridate)
 ```
 
-#Load Dataset
+###1.2 Load Dataset
 Wont work without loading dataset. Go to redcap and pull "ZACH FORBOW Report." Then rename the file so it matches the one below. 
 
 Ensure your WD is set to where you are storing the dataset. 
 ```{r}
-# setwd("C:/Users/hubshmz/Documents/Code/git/data")  # FORBOW computer
-setwd("C:/Users/zacha/OneDrive/Documents/Code/Data")  # Laptop
-# setwd("C:/Users/zacha/Documents/RStudio/forbow/git/Data/ESCAP") # Tupper Windows Comp
-# setwd("C:/Users/zacha/Documents/forbow/code/git") # Home Computer
+#wd <- "C:/Users/hubshmz/Documents/Code/git/data"  # FORBOW computer
+wd <- "C:/Users/zacha/OneDrive/Documents/Code/Data"  # Laptop
+#wd <- "C:/Users/zacha/Documents/RStudio/forbow/git/Data/ESCAP" # Tupper Windows Comp
+#wd <- "C:/Users/zacha/Documents/forbow/code/git" # Home Computer
 
 ##Do unlabeled, ZACH FORBOW report from the master database. 
+
+setwd(wd)
 FOR <- read.csv("rawdataforanalysis2.csv", header=TRUE, fileEncoding="latin1")
 ```
 
 
-#FHR & Group
+#2.0 Participant Information------------
+###2.1 FHR & Group
 This creates:
 - FHR: Defined as parental main diagnosis of MDD, BD, or schizophrenia
 - Group: 0 = Control, 1 = Parental diagnosis of MDD, 2  Parental Diagnosis of BD, 3 = Parent diagnosis of schiz
@@ -44,7 +48,7 @@ table(FOR$group)
 store1 <- c('group', 'fhr')
 ```
 
-#Demographic Variables
+###2.2 Demographic Variables
 This will create
 - Sex
 - Race
@@ -57,44 +61,57 @@ source("scripts/Demographics.R")
 ```
 
 
-#Concurrent Diagnosis, Lifetime, and Hospital Diagnosises 
-This has three scripts. 
-- Concurrent CONFIRMED CONSESUS diagnosis for the diagnosis available in FORBOW. See the glossary at end for a list
-- Lifetime diagnosis diagnosis. This is generated from consesus confirmed diagnosises or from previous confirmed concurrent diagnosises. 
-- Hospital Diagnosises. These are diagnoses put in and generated itself.
-- Onset. Defined as having a concurrent confiremd diagnosis after baseline. 
+#3.0 Diagnosis and Psychopathology -------
+###3.1 Diagnosis
+####3.1.1 Concurrent
+Concurrent CONFIRMED CONSESUS diagnosis for the diagnosis available in FORBOW. See the glossary at end for a list
+####3.1.2 Lifetime
+Lifetime diagnosis diagnosis. This is generated from consensus confirmed diagnoses or from previous confirmed concurrent diagnoses. 
+####3.1.3 Onset
+Onset. Defined as having a concurrent confirmed diagnosis after baseline.
+####3.1.4 Hospital Diagnosises 
+Hospital Diagnoses. These are diagnoses put in and generated itself.
+
 ```{r}
 source("scripts/Concurrent Diagnosis.R")
 source("scripts/Lifetime Diagnosis.R")
-source("scripts/Hospital Diagnosis.R")
 source("scripts/Onset.R")
+source("scripts/Hospital Diagnosis.R")
 ```
 
-#Maltreatment and Bullying
-###Malt variables
-Rudolf has ceca/jvq valid for malt creation... isn't in redcap though so unsure
+
+###4.0 Psychopathology-----------------
+####4.1 Maltreatment and Bullying
+
+CODER NOTES: Rudolf has ceca/jvq valid for malt creation... isn't in redcap though so unsure
 
 This will generate:
 - PolyE 
 - Physical, emotional, neglect, custody disruption, sexual, and experienced violent maltreatment variables. 
 - Additional generates if any maltreatment was experienced
+- Bullying variables: Obully, ocyber, bullying_ever
 ```{r}
 source("scripts/maltreatmentandbullying.R")
-
-
-#Variables from this
-# polye, maltp, malte, maltn, custodydip, malts, maltv.
-# malt = experienced any maltp, e, n, or s
-# malt b = experienced any malt or maltv
-# There are also malt_ever variables, for if someone EVER experienced maltreatment
-
-# Bullying variables, obully, ocyber, and bullying_ever
-
-#Generates polye from adversity/ses info
 ```
 
 
-#Dimension Variables
+####4.2 Dimension Variables
+dimbs, dimpsych, dimsleep, dimirrit, dimafflab
+#####4.2.1 Dimdep
+
+#####4.2.2 Dimanx
+
+#####4.2.3 Sleep
+Generates CSHQ Total
+Also reverse scores CSHQ 
+Missing CSHQ data = does not generate any CSH data. 
+
+Geneates dim sleep - Made up of zCSH, zPSQI, zSSH, and zSSR scores.
+
+CODER NOTE: Working on PSQI: Need to fix SE
+
+#####4.2.4 Psych
+This requires something from rudolf, has to do with curated PLEs
 ```{r}
 #Dimension Depression
 source("scripts/dimdep.R")
@@ -102,6 +119,17 @@ source("scripts/dimdep.R")
 #dimension Anxiety
 source("scripts/dimanx.R")
 
+#Dimension Sleep
+
+#Dimpsych
+```
+
+####4.3 Yeti Variables
+
+#10.0 Output
+```{r}
+setwd(wd)
+write.csv(FOR, file = "analytic-zach.csv", row.names = FALSE)
 ```
 
 #Glossary

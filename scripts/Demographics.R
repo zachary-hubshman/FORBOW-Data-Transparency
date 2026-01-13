@@ -33,6 +33,14 @@ remove(race_lookup)
 
 
 #Age
+FOR <- FOR %>%
+  mutate(dob = na_if(as.character(dob), ""),
+         dob = ymd(dob, quiet = TRUE)) %>%
+  group_by(subject_id) %>%
+  arrange(assessment_date, .by_group = TRUE) %>%
+  fill(dob, .direction = "downup") %>%   # fills both forward + backward
+  ungroup()
+
 FOR$assessment_date <- as.Date(FOR$assessment_date)
 FOR$dob <- as.Date(FOR$dob)
 FOR$age_days <- FOR$assessment_date - FOR$dob
