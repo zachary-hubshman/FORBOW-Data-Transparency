@@ -22,8 +22,7 @@ FOR_P <- FOR %>%
       TRUE ~ NA_real_
     ),
     
-    # pick whichever is defined; if both defined you can decide a rule:
-    # Option A (safer): prefer the "higher risk" direction. With your coding,
+
     # 0 is lowest and 3 is highest, so take max.
     group = pmax(g_m, g_f, na.rm = TRUE),
     group = ifelse(is.infinite(group), NA_real_, group)  # pmax returns -Inf if both NA

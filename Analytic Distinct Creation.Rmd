@@ -29,7 +29,18 @@ wd <- "C:/Users/zacha/OneDrive/Documents/Code/Data"  # Laptop
 ##Do unlabeled, ZACH FORBOW report from the master database. 
 
 setwd(wd)
-FOR <- read.csv("rawdataforanalysis2.csv", header=TRUE, fileEncoding="latin1")
+FOR <- read.csv("rawdataforanalysis.csv", header=TRUE, fileEncoding="latin1")
+
+#Do unlabeled, all data from RMU2012_010 -FORBOW redcap.
+FORredcap <- read.csv("rawdataforanalysis2.csv", header=TRUE, fileEncoding="latin1")
+```
+
+###1.3 Merge Databases
+This probably successfully merges but double check later.
+```{r}
+source("scripts/mergedatabase.R")
+#This has around 70 or so people that arent joined properly. Investigate at some point. 
+#Tthis las
 ```
 
 
@@ -133,11 +144,12 @@ source("scripts/dimsleep.R")
 #Dimension Basic Symptom Antecedents? 
 
 
-
+#Dimension OCD
+#Id double check this script probably.
+source("scripts/dimocd")
 ```
 
 ####4.3 Yeti Variables
-
 
 
 #10.0 Output

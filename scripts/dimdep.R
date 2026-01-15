@@ -29,7 +29,6 @@ FOR <- FOR %>%
   ungroup()
 
 #Gen dimdep
-#compute scalars 
 # 2) Create z-scores and dimensional depression
 FOR <- FOR %>%
   mutate(
