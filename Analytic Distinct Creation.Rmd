@@ -10,10 +10,11 @@ This file is made so that you can create the specific variables you need without
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(haven); library(dplyr); library(tidyr); library(readr); library(readxl); library(data.table); library(stringr); library(purrr)  # Data manipulation & import
-library(fuzzyjoin)  # Joins
 
 library(zoo)
 library(lubridate)
+
+??fuzzyjoin
 ```
 
 ###1.2 Load Dataset
@@ -105,14 +106,21 @@ This will generate:
 source("scripts/maltreatmentandbullying.R")
 ```
 
+####4.2 FORBOW Measures
 
-####4.2 Dimension Variables
+#####4.2.1 Yeti
+```{r}
+source("scripts/yeti.R")
+```
+
+
+####4.3 Dimension Variables
 dimbs, dimirrit, dimafflab
-#####4.2.1 Dimdep
+#####4.3.1 Dimdep
 
-#####4.2.2 Dimanx
+#####4.3.2 Dimanx
 
-#####4.2.3 Sleep
+#####4.3.3 Sleep
 Generates CSHQ Total
 Also reverse scores CSHQ 
 Missing CSHQ data = does not generate any CSH data. 
@@ -123,7 +131,7 @@ CODER NOTE: Working on PSQI: Need to fix SE
 ------PSQI is extremely messy data.-----
 A LOT OF WRONG INPUTS ON PSQI
 
-#####4.2.4 Psych
+#####4.3.4 Psych
 This requires something from rudolf, has to do with curated PLEs
 ```{r}
 #Dimension Depression
@@ -147,10 +155,9 @@ source("scripts/dimal.R")
 
 #Dimension OCD
 #Id double check this script probably.
-source("scripts/dimocd")
+source("scripts/dimocd.R")
 ```
 
-####4.3 Yeti Variables
 
 
 #10.0 Output
