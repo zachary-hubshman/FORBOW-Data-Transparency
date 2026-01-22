@@ -37,7 +37,7 @@ FORredcap <- read.csv("rawdataforanalysis2.csv", header=TRUE, fileEncoding="lati
 ###1.3 Merge Databases
 This probably successfully merges but double check later.
 ```{r}
-source("scripts/mergedatabase.R")
+source("scripts/demographic/mergedatabase.R")
 #This has around 70 or so people that arent joined properly. Investigate at some point. 
 #Tthis las
 ```
@@ -52,7 +52,7 @@ This creates:
 
 TO-DO: Have this also create other parent diagnosis variables
 ```{r}
-source("scripts/Family_Risk_And_Group_Creation.R")
+source("scripts/demographic/Family_Risk_And_Group_Creation.R")
 table(FOR$group)
 
 store1 <- c('group', 'fhr')
@@ -67,8 +67,11 @@ This will create
 - Pubertal Status (Only Females)
 - Bio family at home (0 = doesnt live with bio fam, 1 = lives with bio fam)
 ```{r}
-source("scripts/Demographics.R")
+source("scripts/demographic/Demographics.R")
 ```
+
+###2.3 Meds
+WIP
 
 
 #3.0 Diagnosis and Psychopathology -------
@@ -238,13 +241,29 @@ source("scripts/standarized scale harmonized scores/dimal.R")
 
 
 ####4.4 Antecedents
+#####4.4.1 Dimdep
+Generates dimdep - If ccMDD or ccDEP == 1 then dimdep == 1. If MFQy or MFQp > 8.5 then dimdep == 1. 
+```{r}
+source("scripts/dimensions/dimdep.R")
+sum(FOR$ccMDD == 1, na.rm = TRUE)
+sum(FOR$ccDEP == 1, na.rm = TRUE)
+sum(FOR$mfqytot > 8.5, na.rm = TRUE)
+sum(FOR$mfqptot > 8.5, na.rm = TRUE)
+```
 
+#####4.4.2 Dim
 
 
 #10.0 Output
+##10.1 Output Everything
 ```{r}
 setwd(wd)
 write.csv(FOR, file = "analytic-zach.csv", row.names = FALSE)
+```
+
+##10.2 Output what scripts you ran
+```{r}
+#WIP
 ```
 
 #Glossary
