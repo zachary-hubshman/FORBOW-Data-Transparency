@@ -13,6 +13,7 @@ library(haven); library(dplyr); library(tidyr); library(readr); library(readxl);
 
 library(zoo)
 library(lubridate)
+library(sitar)
 ```
 
 ###1.2 Load Dataset
@@ -113,7 +114,7 @@ source("scripts/maltreatmentandbullying.R")
 ```
 
 ####4.2 FORBOW Measures
-ARI, CALS PARENT, SSR, SRS PRESCHOOL/SCHOOL AGE/ADULT, PTQ, CMES, CSM, MADRS, BPFSC, PAQ, IPAQ, DERS, RAS
+SSR, SRS PRESCHOOL/SCHOOL AGE/ADULT, PTQ, CMES, CSM, MADRS, BPFSC, PAQ, IPAQ, DERS, RAS
 
 #####4.2.1 Yeti
 ```{r}
@@ -194,14 +195,30 @@ source("scripts/Measures/OCI.R")
 
 #####4.2.11 CALS
 ```{r}
-source("scripts/Measure/CALS.R")
+source("scripts/Measures/CALS.R")
 ```
 
 #####4.2.12 ALS
 ```{r}
-source("scripts/Measure/ALS.R")
+source("scripts/Measures/ALS.R")
 ```
 
+
+#####4.2.13 ARI
+```{r}
+source("scripts/Measures/ARI.R")
+```
+
+#####4.2.14 PAQ
+```{r}
+
+```
+
+#####4.2.15 IPAQ
+This will generate Metabolitic Equivalent Minutes
+```{r}
+source("scripts/Measures/IPAQ.R")
+```
 
 ####4.3 Dimension Variables
 dimbs, dimirrit, dimafflab
@@ -270,7 +287,7 @@ sum(FOR$mfqptot > 8.5, na.rm = TRUE)
 ##10.1 Output Everything
 ```{r}
 setwd(wd)
-write.csv(FOR, file = "analytic-zach.csv", row.names = FALSE)
+write.csv(FOR, file = "analytic-zach1.csv", row.names = FALSE)
 ```
 
 ##10.2 Output what scripts you ran
