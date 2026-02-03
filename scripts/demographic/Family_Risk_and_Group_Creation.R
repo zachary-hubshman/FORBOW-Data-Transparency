@@ -1,5 +1,5 @@
 #Family Risk
-FOR$fid <- substr(FOR$subject_id, 5, 7)
+FOR$fid <- substr(FOR$subject_id, 1, 7)
 FOR$iid <- substr(FOR$subject_id, 8, 11)
 FOR_P <- FOR %>%
   filter(str_detect(subject_id, "F[1-3]|f[1-3]|M[1-3]|m[1-3]|\\$R")) %>%

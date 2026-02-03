@@ -113,6 +113,7 @@ source("scripts/maltreatmentandbullying.R")
 ```
 
 ####4.2 FORBOW Measures
+ARI, CALS PARENT, SSR, SRS PRESCHOOL/SCHOOL AGE/ADULT, PTQ, CMES, CSM, MADRS, BPFSC, PAQ, IPAQ, DERS, RAS
 
 #####4.2.1 Yeti
 ```{r}
@@ -191,13 +192,22 @@ Sub scales Generated:
 source("scripts/Measures/OCI.R")
 ```
 
+#####4.2.11 CALS
+```{r}
+source("scripts/Measure/CALS.R")
+```
 
+#####4.2.12 ALS
+```{r}
+source("scripts/Measure/ALS.R")
+```
 
 
 ####4.3 Dimension Variables
 dimbs, dimirrit, dimafflab
 #####4.3.1 Dimdep
 Generates dimdep - Made up of zMFQytot and zMFQptot
+
 ```{r}
 #Dimension Depression
 source("scripts/standarized scale harmonized scores/dimdep.R")
@@ -238,6 +248,8 @@ source("scripts/standarized scale harmonized scores/dimocd.R")
 #Dimension affect Lability
 source("scripts/standarized scale harmonized scores/dimal.R")
 ```
+
+
 
 
 ####4.4 Antecedents
