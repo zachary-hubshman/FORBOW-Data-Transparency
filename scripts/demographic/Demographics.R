@@ -73,6 +73,42 @@ FOR <- FOR %>%
   )
 
 #PDS
+##Male
+#voice
+FOR$gcqma_a2 <- as.numeric(FOR$gcqma_a2)
+FOR$gcqma_a2 <- as.numeric(FOR$gcqma_a2)
+#face growth
+FOR$gcqma_a5_new <- as.numeric(FOR$gcqma_a5_new)
+FOR$gcqmp_a5_new <- as.numeric(FOR$gcqmp_a5_new)
+
+#skin changes
+FOR$gcqma_a3_new <- as.numeric(FOR$gcqma_a3_new)
+FOR$gcqmp_a3_new <- as.numeric(FOR$gcqmp_a3_new)
+
+#body hair growth
+FOR$gcqma_a4_new <- as.numeric(FOR$gcqma_a4_new)
+FOR$gcqmp_a4_new <- as.numeric(FOR$gcqmp_a4_new)
+
+FOR <- FOR %>%
+  mutate(
+    across(
+      c(gcqma_a2, gcqmp_a2),
+      ~ if_else(as.numeric(.) >= 4, NA_real_, as.numeric(.))
+    ),
+    across(
+      c(gcqma_a3_new, gcqmp_a3_new,
+        gcqma_a4_new, gcqmp_a4_new,
+        gcqma_a5_new, gcqmp_a5_new),
+      ~ if_else(as.numeric(.) >= 5, NA_real_, as.numeric(.))
+    )
+  )
+
+
+
+
+
+
+
 ##Female
 ###Menarche
 FOR$gcqfa_d2 <- as.numeric(FOR$gcqfa_d2) 
@@ -155,11 +191,17 @@ FOR <- FOR %>%
   )
 
 ###Puberty stage
-
+FOR <- FOR %>%
+  mutate(
+    puberty_pds_female = pmax(puberty_pds_fa, puberty_pds_fp, na.rm = TRUE)
+  )
 
 FOR <- FOR %>%
   mutate(
-    puberty_pds = pmax(puberty_pds_fa, puberty_pds_fp, na.rm = TRUE)
+    puberty_pds = case_when(
+      sex == "2" ~ puberty_pds_female,
+      TRUE           ~ NA_integer_
+    )
   )
 
 ###Handling missingness

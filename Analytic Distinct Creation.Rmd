@@ -26,10 +26,10 @@ wd <- "C:/Users/zacha/OneDrive/Documents/Code/Data"  # Laptop
 #wd <- "C:/Users/zacha/Documents/RStudio/forbow/git/Data/ESCAP" # Tupper Windows Comp
 #wd <- "C:/Users/zacha/Documents/forbow/code/git" # Home Computer
 
-##Do unlabeled, ZACH FORBOW report from the master database. 
+##Do unlabeled, ZACH FORBOW report 2!!!! I SAID 2!!!! from the master database. 
 
 setwd(wd)
-FOR <- read.csv("rawdataforanalysis.csv", header=TRUE, fileEncoding="latin1")
+FOR <- read.csv("rawdataforanalysis1.csv", header=TRUE, fileEncoding="latin1")
 
 #Do unlabeled, all data from RMU2012_010 -FORBOW redcap.
 FORredcap <- read.csv("rawdataforanalysis2.csv", header=TRUE, fileEncoding="latin1")
@@ -38,9 +38,11 @@ FORredcap <- read.csv("rawdataforanalysis2.csv", header=TRUE, fileEncoding="lati
 ###1.3 Merge Databases
 This probably successfully merges but double check later.
 ```{r}
+length(unique(FOR$subject_id))
 source("scripts/demographic/mergedatabase.R")
-#This has around 70 or so people that arent joined properly. Investigate at some point. 
-#Tthis las
+
+length()
+#Forbow in total has 691 participants, 41 new glasgow participants, and 650 abbey j lne. 
 ```
 
 
