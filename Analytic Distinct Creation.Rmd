@@ -219,7 +219,7 @@ source("scripts/Measures/ARI.R")
 #####4.2.15 IPAQ
 This will generate Metabolitic Equivalent Minutes
 ```{r}
-source("scripts/Measures/IPAQ.R")
+#source("scripts/Measures/IPAQ.R")
 ```
 
 ####4.3 Dimension Variables
