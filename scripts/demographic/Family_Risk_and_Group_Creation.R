@@ -55,6 +55,11 @@ FOR <- FOR %>%
   left_join(fid_group_list, by = "fid")
 
 FOR <- FOR %>%
+  dplyr::mutate(
+    group = dplyr::if_else(group == 0.5, 4, group)
+  )
+
+FOR <- FOR %>%
   mutate(fhr = case_when(
     group %in% c(1, 2, 3, 4, 5) ~ 1L,
     TRUE ~ 0L
