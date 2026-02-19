@@ -17,7 +17,7 @@ library(sitar)
 ```
 
 ###1.2 Load Dataset
-Wont work without loading dataset. Go to redcap and pull "ZACH FORBOW Report." Then rename the file so it matches the one below. 
+Wont work without loading dataset. Go to redcap and pull "ZACH FORBOW Report." Then rename the file so it matches the one below.  No longer need to pull zach forbow report 2, I deleted the bugged one.
 
 Ensure your WD is set to where you are storing the dataset. 
 ```{r}
@@ -26,7 +26,7 @@ wd <- "C:/Users/zacha/OneDrive/Documents/Code/Data"  # Laptop
 #wd <- "C:/Users/zacha/Documents/RStudio/forbow/git/Data/ESCAP" # Tupper Windows Comp
 #wd <- "C:/Users/zacha/Documents/forbow/code/git" # Home Computer
 
-##Do unlabeled, ZACH FORBOW report 2!!!! I SAID 2!!!! from the master database. 
+##Do unlabeled, ZACH FORBOW report (just FORBOW report) from the master database. 
 
 setwd(wd)
 FOR <- read.csv("rawdataforanalysis1.csv", header=TRUE, fileEncoding="latin1")
