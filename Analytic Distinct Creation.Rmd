@@ -29,7 +29,7 @@ wd <- "C:/Users/zacha/OneDrive/Documents/Code/Data"  # Laptop
 ##Do unlabeled, ZACH FORBOW report (just FORBOW report) from the master database. 
 
 setwd(wd)
-FOR <- read.csv("rawdataforanalysis1.csv", header=TRUE, fileEncoding="latin1")
+FOR <- read.csv("rawdataforanalysis.csv", header=TRUE, fileEncoding="latin1")
 
 #Do unlabeled, all data from RMU2012_010 -FORBOW redcap.
 FORredcap <- read.csv("rawdataforanalysis2.csv", header=TRUE, fileEncoding="latin1")
@@ -40,9 +40,9 @@ This probably successfully merges but double check later.
 ```{r}
 length(unique(FOR$subject_id))
 source("scripts/demographic/mergedatabase.R")
-
-length()
 #Forbow in total has 691 participants, 41 new glasgow participants, and 650 abbey j lne. 
+
+store1 <- c('subject_id', 'time_point', 'assessment_date')
 ```
 
 
@@ -58,7 +58,7 @@ TO-DO: Have this also create other parent diagnosis variables
 source("scripts/demographic/Family_Risk_And_Group_Creation.R")
 table(FOR$group)
 
-store1 <- c('group', 'fhr')
+store2 <- c('group', 'fhr')
 ```
 
 ###2.2 Demographic Variables
@@ -67,10 +67,13 @@ This will create
 - Race 
 - Age
 - SES 
-- Pubertal Status (Only Females)
+- Pubertal Status (Only Females) # NEED TO ADD PUERYT 
 - Bio family at home (0 = doesnt live with bio fam, 1 = lives with bio fam)
 ```{r}
 source("scripts/demographic/Demographics.R")
+
+#need puberyt
+store3 <- c('sex', 'race', 'age', 'ses', 'home_bio')
 ```
 
 ###2.3 Meds
@@ -83,16 +86,40 @@ WIP
 Concurrent CONFIRMED CONSESUS diagnosis for the diagnosis available in FORBOW. See the glossary at end for a list
 ```{r}
 source("scripts/Diagnosis/Concurrent Diagnosis.R")
+
+store4 <- c('ccMDD', 'ccDEP', 'ccDysthy', 'ccBP', 'ccBPI', 'ccBPII', 'ccMOOD',
+               'ccPsychosis', 'cciPsychosis', 'ccSCZ', 'ccSchAff',
+               'ccSUD', 'ccAlc', 'ccCan', 'ccDependence',
+               'ccAnx', 'ccPanic', 'ccOthAnx', 'ccGAD', 'ccSocialP', 'ccPTSD', 'ccAgora', 'ccSpecificP', 'ccOCD', 'ccSAD',
+               'ccADHD', 'ccODD', 'ccConduct', 'ccDisrupt',
+               'ccED', 'ccEDNOS', 'ccAnor', 'ccBulims',
+               'ccAutism', 'ccASD', 'ccTic', 'ccTouret',
+               'ccLD', 'ccLDs', 'ccLDg',
+               'ccDMDD', 'ccSleep',
+               'ccBorderline', 'ccAntisocial', 'ccPersonalityDisord')
 ```
 ####3.1.2 Lifetime
 Lifetime diagnosis diagnosis. This is generated from consensus confirmed diagnoses or from previous confirmed concurrent diagnoses. 
 ```{r}
 source("scripts/Diagnosis/Lifetime Diagnosis.R")
+
+store5 <- c('clMDD', 'clDEP', 'clDysthy', 'clBP', 'clBPI', 'clBPII', 'clMOOD',
+               'clPsychosis', 'cliPsychosis', 'clSCZ', 'clSchAff',
+               'clSUD', 'clAlc', 'clCan', 'clDependence',
+               'clAnx', 'clPanic', 'clOthAnx', 'clGAD', 'clSocialP', 'clPTSD', 'clAgora', 'clSpecificP', 'clOCD', 'clSAD',
+               'clADHD', 'clODD', 'clConduct', 'clDisrupt',
+               'clED', 'clEDNOS', 'clAnor', 'clBulims',
+               'clAutism', 'clASD', 'clTic', 'clTouret',
+               'clLD', 'clLDs', 'clLDg',
+               'clDMDD', 'clSleep',
+               'clBorderline', 'clAntisocial', 'clPersonalityDisord')
 ```
 ####3.1.3 Onset
 Onset. Defined as having a concurrent confirmed diagnosis after baseline.
 ```{r}
 source("scripts/Diagnosis/Onset.R")
+store6 <- c("")
+#store6 <- c('oMDD', 'oDEP', 'oDysthy', 'oBP', 'oBPI', 'oBPII', 'oMOOD', 'oPsychosis', 'oiPsychosis', 'oSCZ', 'oSchAff', 'oSUD', 'oAlc', 'oCan', 'oDependence', 'oAnx', 'oPanic', 'oOthAnx', 'oGAD', 'oSocialP', 'oPTSD', 'oAgora', 'oSpecificP', 'oOCD', 'oSAD',               'oADHD', 'oODD', 'oConduct', 'oDisrupt',               'oED', 'oEDNOS', 'oAnor', 'oBulims',              'oAutism', 'oASD', 'oTic', 'oTouret',               'oLD', 'oLDs', 'oLDg',  'oDMDD','oSleep', 'oBorderline', 'oAntisocial', 'oPersonalityDisord')
 ```
 ####3.1.4 Hospital Diagnosises 
 Hospital Diagnoses. These are diagnoses put in and generated itself.
@@ -113,6 +140,8 @@ This will generate:
 - Bullying variables: Obully, ocyber, bullying_ever
 ```{r}
 source("scripts/maltreatmentandbullying.R")
+
+store7 <- c("maltp", "malte", "maltn", "custodydisp", "malts", "maltv", "malt", "bmalt", "maltp_ever", "malte_ever", "maltn_ever", "malts_ever", "maltv_ever", "custody_ever", "malt_ever", "bmalt_ever", "bullying", "cyber", "adversity", "polye", "polyvicte", "polysese", "volyv", "c4polyv", "zpolye")
 ```
 
 ####4.2 FORBOW Measures
@@ -121,6 +150,8 @@ SSR, SRS PRESCHOOL/SCHOOL AGE/ADULT, PTQ, CMES, CSM, MADRS, BPFSC, PAQ, IPAQ, DE
 #####4.2.1 Yeti
 ```{r}
 source("scripts/Measures/yeti.R")
+
+store8 <- c("yetitotal", "yetidep", "yetiafflab", "yetipsych", "yetibs", "yetisleep")
 ```
 
 #####4.2.2 MFQ
@@ -128,18 +159,24 @@ Generates mfqptot and mfqytot. Totals of youth/parent scoring of MFQ
 This also has imputation in it using median.
 ```{r}
 source("scripts/Measures/mfq.R")
+
+store9 <- c("mfqptot", "mfqytot")
 ```
 
 #####4.2.3 Scared
 Generates scared total from youth and parent. 
 ```{r}
 source("scripts/Measures/scared.R")
+
+store10 <- c("Scared_P_Total", "Scared_C_Total")
 ```
 
 #####4.2.4 Scas
 Generates scas total from youth and parent.
 ```{r}
 source("scripts/Measures/scas.R")
+
+store11 <- c("Scas_C_Total", "Scas_P_Total")
 ```
 
 #####4.2.5 CSHQ
@@ -147,6 +184,9 @@ Generate CSHQ total.
 Needs subscales added in.
 ```{r}
 source("scripts/Measures/cshq.R")
+
+#Needs subscales
+store12 <- c("CSHQTotal", "cshsleepbeh", "cshwake", "zcshsleepbeh", "zcshwake", "zcsh")
 ```
 
 
@@ -166,19 +206,29 @@ A LOT OF WRONG INPUTS ON PSQI
 NEEDS MANUALLY FIXING
 ```{r}
 source("scripts/Measures/psqi.R")
+
+store13 <- c("")
 ```
 
 #####4.2.7 SSH
 ```{r}
 source("scripts/Measures/SSH.R")
+
+store14 <- c("sshtotal")
 ```
 
 #####4.2.8 SSR
+```{r}
+
+store15 <- c("")
+```
 
 
 #####4.2.9 Choci
 ```{r}
 source("scripts/Measures/CHOCI.R")
+
+store16 <- c("choci_symp_tot_y", "choci_symp_tot_p", "choci_impr_tot_y", "choci_impr_tot_p", "choci_tot_y", "choci_tot_p")
 ```
 
 #####4.2.10 OCI
@@ -193,33 +243,43 @@ Sub scales Generated:
 - Order
 ```{r}
 source("scripts/Measures/OCI.R")
+
+store17 <- c("OCI_Obsess", "OCI_Wash", "OCI_Check", "OCI_Hoard", "OCI_Doubt", "OCI_Neutrl", "OCI_Order", "OCI_Total")
 ```
 
 #####4.2.11 CALS
 ```{r}
 source("scripts/Measures/CALS.R")
+
+store18 <- c("cals_y_tot", "cals_p_tot")
 ```
 
 #####4.2.12 ALS
 ```{r}
 source("scripts/Measures/ALS.R")
+
+store19 <- c("als_total")
 ```
 
 
 #####4.2.13 ARI
 ```{r}
 source("scripts/Measures/ARI.R")
+
+store20 <- c("ari_s_tot", "ari_p_tot")
 ```
 
 #####4.2.14 PAQ
 ```{r}
-
+store21 <- c("")
 ```
 
 #####4.2.15 IPAQ
 This will generate Metabolitic Equivalent Minutes
 ```{r}
 #source("scripts/Measures/IPAQ.R")
+
+store22 <- c("")
 ```
 
 ####4.3 Dimension Variables
@@ -230,6 +290,8 @@ Generates dimdep - Made up of zMFQytot and zMFQptot
 ```{r}
 #Dimension Depression
 source("scripts/standarized scale harmonized scores/dimdep.R")
+
+store23 <- c("MFQ_C_z", "MFQ_P_z", "dimdep")
 ```
 
 #####4.3.2 Dimanx
@@ -237,6 +299,8 @@ Generates dimanx - Made up of zSCAREDytot, zSCAREDptot, zSCASytot, and zSCASptot
 ```{r}
 #dimension Anxiety
 source("scripts/standarized scale harmonized scores/dimanx.R")
+
+store24 <- c("Scared_C_Total_z", "Scared_P_Total_z", "Scas_C_z", "Scas_P_z", "dimanx")
 ```
 
 #####4.3.3 Sleep
@@ -249,6 +313,8 @@ A LOT OF WRONG INPUTS ON PSQI
 ```{r}
 #Dimension Sleep
 source("scripts/standarized scale harmonized scores/dimsleep.R")
+
+store25 <- c("")
 ```
 
 #####4.3.4 Psych
@@ -260,12 +326,16 @@ Generates dimocd - Made up of zCHOCIptot, zCHOCIytot, and zOCI.
 #Dimension OCD
 #Id double check this script probably.
 source("scripts/standarized scale harmonized scores/dimocd.R")
+
+store26 <- c("choci_tot_p_z", "choci_tot_y_z", "oci_tot_z", "dimocd")
 ```
 
 #####4.3.6 Affective Lability
 ```{r}
 #Dimension affect Lability
 source("scripts/standarized scale harmonized scores/dimal.R")
+
+store27 <- c("cals_tot_y_z", "cals_tot_p_z", "als_tot_z", "dimal")
 ```
 
 
@@ -275,11 +345,13 @@ source("scripts/standarized scale harmonized scores/dimal.R")
 #####4.4.1 Dimdep
 Generates dimdep - If ccMDD or ccDEP == 1 then dimdep == 1. If MFQy or MFQp > 8.5 then dimdep == 1. 
 ```{r}
-source("scripts/dimensions/dimdep.R")
+source("scripts/standarized scale harmonized scores/dimdep.R")
 sum(FOR$ccMDD == 1, na.rm = TRUE)
 sum(FOR$ccDEP == 1, na.rm = TRUE)
 sum(FOR$mfqytot > 8.5, na.rm = TRUE)
 sum(FOR$mfqptot > 8.5, na.rm = TRUE)
+
+store28 <- c("MFQ_C_z", "MFQ_P_z", "dimdep") 
 ```
 
 #####4.4.2 Dim
@@ -294,7 +366,24 @@ write.csv(FOR, file = "analytic-zach1.csv", row.names = FALSE)
 
 ##10.2 Output what scripts you ran
 ```{r}
-#WIP
+#Stores the list of different variables you have ran
+stores <- mget(paste0("store", 1:28), ifnotfound = NA)
+
+#Removes any variables that are full of missing variables
+stores <- stores[!sapply(stores, function(x) all(is.na(x)))]
+
+#Filters in FOR, finds just the variables you want that aren't NA and that aren't a blank string. 
+FOR_filtered <- lapply(stores, function(vars) {
+  vars <- vars[vars != "" & !is.na(vars) & vars %in% colnames(FOR)]
+  FOR[, vars, drop = FALSE]
+})
+
+#Turns into a dataframe from a list
+FOR_combined <- do.call(cbind, FOR_filtered)
+
+#Renames the variables
+colnames(FOR_combined) <- sub("^store[0-9]+\\.", "", colnames(FOR_combined))
+write.csv(FOR_combined, file = "FOR_Database_Clean&Filtered.csv", row.names = FALSE)
 ```
 
 #Glossary

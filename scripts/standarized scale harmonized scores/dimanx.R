@@ -18,3 +18,4 @@ FOR <- FOR %>%
 FOR <- FOR %>%
   # SCAS dimanx
   mutate(dimanx = rowMeans(across(c(Scas_C_z, Scas_P_z, Scared_C_Total_z, Scared_P_Total_z)), na.rm = TRUE)) 
+
