@@ -63,6 +63,8 @@ As a temporary measure, this will be using vars.all to create group variables.
 
 ```{r}
 source("scripts/demographic/Family_Risk_And_Group_Creation.R")
+
+store2 <- c('group', 'fhr')
 ```
 
 ###2.2 Demographic Variables
@@ -400,7 +402,10 @@ FOR_combined <- do.call(cbind, FOR_filtered)
 
 #Renames the variables
 colnames(FOR_combined) <- sub("^store[0-9]+\\.", "", colnames(FOR_combined))
+<<<<<<< HEAD
 setwd(wd)
+=======
+>>>>>>> d17766efd31236a985db6de931b7f134c977c587
 write.csv(FOR_combined, file = "FOR_Database_Clean&Filtered.csv", row.names = FALSE)
 ```
 
