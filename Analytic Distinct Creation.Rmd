@@ -33,6 +33,9 @@ FOR <- read.csv("rawdataforanalysis.csv", header=TRUE, fileEncoding="latin1")
 
 #Do unlabeled, all data from RMU2012_010 -FORBOW redcap.
 FORredcap <- read.csv("rawdataforanalysis2.csv", header=TRUE, fileEncoding="latin1")
+
+#Download Vars 
+vars <- read.csv('vars-all20250509.csv', header=TRUE)
 ```
 
 ###1.3 Merge Databases
@@ -48,17 +51,18 @@ store1 <- c('subject_id', 'time_point', 'assessment_date')
 
 #2.0 Participant Information------------
 ###2.1 FHR & Group
+
+
 This creates:
 - FHR: Defined as parental main diagnosis of MDD, BD, or schizophrenia
-- Group: 0 = Control, 1 = Parental diagnosis of MDD, 2  Parental Diagnosis of BD, 3 = Parent diagnosis of schiz
+- Group: 0 = Control, 1 = Parental diagnosis of MDD, 2  Parental Diagnosis of BD, 3 = Parent diagnosis of schiz, 4 = Other SMI (ASD, OCD, Antisocial, cases of SMI etc), 5 = gene deletion
 
+This is being worked on by Rudolf and Katie and will eventually be merged into this file.
 
-TO-DO: Have this also create other parent diagnosis variables
+As a temporary measure, this will be using vars.all to create group variables. 
+
 ```{r}
 source("scripts/demographic/Family_Risk_And_Group_Creation.R")
-table(FOR$group)
-
-store2 <- c('group', 'fhr')
 ```
 
 ###2.2 Demographic Variables
@@ -77,8 +81,10 @@ store3 <- c('sex', 'race', 'age', 'ses', 'home_bio')
 ```
 
 ###2.3 Meds
-WIP
-
+```{r}
+FOR <- FOR %>% 
+  filter(!str_detect(subject_id, "F[1-3]|f[1-3]|M[1-3]|m[1-3]|\\$R"))
+```
 
 #3.0 Diagnosis and Psychopathology -------
 ###3.1 Diagnosis
@@ -125,6 +131,11 @@ store6 <- c("")
 Hospital Diagnoses. These are diagnoses put in and generated itself.
 ```{r}
 source("scripts/Diagnosis/Hospital Diagnosis.R")
+
+FOR %>%
+  filter(mdx == 98 | fdx == 98) %>%
+  select(mdxdt, fdxdt) %>%
+  print()
 ```
 
 
@@ -282,6 +293,12 @@ This will generate Metabolitic Equivalent Minutes
 store22 <- c("")
 ```
 
+####4.2.16 CBCL
+```{R}
+
+store23 <- c("")
+```
+
 ####4.3 Dimension Variables
 dimbs, dimirrit, dimafflab
 #####4.3.1 Dimdep
@@ -291,7 +308,7 @@ Generates dimdep - Made up of zMFQytot and zMFQptot
 #Dimension Depression
 source("scripts/standarized scale harmonized scores/dimdep.R")
 
-store23 <- c("MFQ_C_z", "MFQ_P_z", "dimdep")
+store24 <- c("MFQ_C_z", "MFQ_P_z", "dimdep")
 ```
 
 #####4.3.2 Dimanx
@@ -300,7 +317,7 @@ Generates dimanx - Made up of zSCAREDytot, zSCAREDptot, zSCASytot, and zSCASptot
 #dimension Anxiety
 source("scripts/standarized scale harmonized scores/dimanx.R")
 
-store24 <- c("Scared_C_Total_z", "Scared_P_Total_z", "Scas_C_z", "Scas_P_z", "dimanx")
+store25 <- c("Scared_C_Total_z", "Scared_P_Total_z", "Scas_C_z", "Scas_P_z", "dimanx")
 ```
 
 #####4.3.3 Sleep
@@ -314,7 +331,7 @@ A LOT OF WRONG INPUTS ON PSQI
 #Dimension Sleep
 source("scripts/standarized scale harmonized scores/dimsleep.R")
 
-store25 <- c("")
+store26 <- c("")
 ```
 
 #####4.3.4 Psych
@@ -327,7 +344,7 @@ Generates dimocd - Made up of zCHOCIptot, zCHOCIytot, and zOCI.
 #Id double check this script probably.
 source("scripts/standarized scale harmonized scores/dimocd.R")
 
-store26 <- c("choci_tot_p_z", "choci_tot_y_z", "oci_tot_z", "dimocd")
+store27 <- c("choci_tot_p_z", "choci_tot_y_z", "oci_tot_z", "dimocd")
 ```
 
 #####4.3.6 Affective Lability
@@ -335,7 +352,7 @@ store26 <- c("choci_tot_p_z", "choci_tot_y_z", "oci_tot_z", "dimocd")
 #Dimension affect Lability
 source("scripts/standarized scale harmonized scores/dimal.R")
 
-store27 <- c("cals_tot_y_z", "cals_tot_p_z", "als_tot_z", "dimal")
+store28 <- c("cals_tot_y_z", "cals_tot_p_z", "als_tot_z", "dimal")
 ```
 
 
@@ -351,7 +368,7 @@ sum(FOR$ccDEP == 1, na.rm = TRUE)
 sum(FOR$mfqytot > 8.5, na.rm = TRUE)
 sum(FOR$mfqptot > 8.5, na.rm = TRUE)
 
-store28 <- c("MFQ_C_z", "MFQ_P_z", "dimdep") 
+store29 <- c("MFQ_C_z", "MFQ_P_z", "dimdep") 
 ```
 
 #####4.4.2 Dim

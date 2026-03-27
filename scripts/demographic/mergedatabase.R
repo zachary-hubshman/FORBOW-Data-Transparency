@@ -3,7 +3,7 @@ FORredcap <- FORredcap %>% filter(subject_id != '800')
 FOR <- FOR %>%
   mutate(subject_id = as.character(subject_id)) %>%
   filter(str_detect(subject_id, "^(\\d{10}|\\d{7}[MF][1-3])$"))
-invalid_si <- c("3909999999", "8009998999", "8009999997", "8009999999", "9999999888", "9999999998", "8009999123")
+invalid_si <- c("3909999999", "8009998999", "8009999997", "8009999999", "9999999888", "9999999998", "8009999123", "8009998M1", "8009999F1", "8009999M1", "9999999M2", "8003016M1")
 FOR <- FOR %>%
   filter(!subject_id %in% invalid_si)
 

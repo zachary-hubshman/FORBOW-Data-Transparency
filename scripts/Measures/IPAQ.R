@@ -132,4 +132,9 @@ FOR2 <- FOR2 %>%
   ),
   ipaq_7_min = as.numeric(ipaq_7_min))
 
+table(FOR2$ipaq_8)
 
+FOR2 <- FOR2 %>%
+  mutate(ipaq_8 = case_when(
+    ipaq_8 == "2 days" ~ ""
+  ))

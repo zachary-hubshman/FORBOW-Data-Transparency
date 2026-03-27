@@ -1,69 +1,50 @@
-#Family Risk
+#Parent Education
 FOR$fid <- substr(FOR$subject_id, 1, 7)
 FOR$iid <- substr(FOR$subject_id, 8, 11)
-FOR_P <- FOR %>%
-  filter(str_detect(subject_id, "F[1-3]|f[1-3]|M[1-3]|m[1-3]|\\$R")) %>%
+FOR <- FOR %>%
   mutate(
-    mdx = as.numeric(mdx),
-    fdx = as.numeric(fdx),
-    
-    g_m = case_when(
-      mdx == 4 ~ 1,
-      mdx %in% c(2, 3) ~ 2,
-      mdx == 1 ~ 3,
-      mdx == 0 ~ 0,
-      TRUE ~ NA_real_
-    ),
-    g_f = case_when(
-      fdx == 4 ~ 1,
-      fdx %in% c(2, 3) ~ 2,
-      fdx == 1 ~ 3,
-      fdx == 0 ~ 0,
-      TRUE ~ NA_real_
-    ),
-    
+    subject_id_mother = na_if(subject_id_mother, ""),
+    subject_id_father = na_if(subject_id_father, "")
+  )
+FOR <- FOR %>% group_by(subject_id) %>%
+  fill(subject_id_mother, .direction = "downup") %>%
+  fill(subject_id_father, .direction = "downup") %>%
+  ungroup()
 
-    # 0 is lowest and 3 is highest, so take max.
-    group = pmax(g_m, g_f, na.rm = TRUE),
-    group = ifelse(is.infinite(group), NA_real_, group)  # pmax returns -Inf if both NA
-  ) %>%
-  group_by(subject_id) %>%
-  mutate(
-    # choose the group from a “parent row” if that exists, otherwise any non-NA group
-    group = {
-      gp <- group[is.na(time_point) & !is.na(group)]
-      if (length(gp) > 0) gp[1] else {
-        ga <- group[!is.na(group)]
-        if (length(ga) > 0) ga[1] else NA_real_
-      }
-    }
-  ) %>%
+
+FOR_P <- FOR %>%
+  group_by(fid) %>%
+  filter(any(str_detect(subject_id, "F[1-3]|f[1-3]|M[1-3]|m[1-3]"))) %>%
   ungroup()
 
 
 fid_group_list <- FOR_P %>%
-  group_by(fid) %>%
+  group_by(subject_id) %>%
   summarise(
-    group = if (all(is.na(group))) NA_real_ else max(group, na.rm = TRUE),
     medul_parent = if (all(is.na(medul))) NA_real_ else max(medul, na.rm = TRUE),
     fedul_parent = if (all(is.na(fedul))) NA_real_ else max(fedul, na.rm = TRUE),
     .groups = "drop"
   )
 
+fid_list1 <- fid_group_list %>% filter((str_detect(subject_id, "F[1-3]|f[1-3]")))
+fid_list2 <- fid_group_list %>% filter((str_detect(subject_id, "M[1-3]|m[1-3]")))
+fid_list1 <- fid_list1 %>% rename(subject_id_father = subject_id)  %>% select(subject_id_father, fedul_parent)
+fid_list2 <- fid_list2 %>% rename(subject_id_mother = subject_id)  %>% select(subject_id_mother, medul_parent)
+
+
 #Join back into full data set
 FOR <- FOR %>%
-  left_join(fid_group_list, by = "fid")
-
+  left_join(fid_list1, by = "subject_id_father")
 FOR <- FOR %>%
-  dplyr::mutate(
-    group = dplyr::if_else(group == 0.5, 4, group)
-  )
-
-FOR <- FOR %>%
-  mutate(fhr = case_when(
-    group %in% c(1, 2, 3, 4, 5) ~ 1L,
-    TRUE ~ 0L
-  ))
-
+  left_join(fid_list2, by = "subject_id_mother")
 
 rm(FOR_P, fid_group_list)
+
+#Group with vars
+vars$subject_id <- vars$Subject_ID
+vars <- vars %>% select(subject_id, group)
+vars$subject_id <- as.character(vars$subject_id)
+vars <- vars %>% distinct(subject_id, group)
+FOR <- FOR %>%
+  left_join(vars, by = "subject_id")
+rm(vars) 
