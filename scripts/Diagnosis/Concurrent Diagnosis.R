@@ -292,3 +292,15 @@ for (i in 1:10) {
 
 FOR <- FOR %>%
   mutate(ccMOOD = ifelse(ccBP == 1 | ccDEP == 1 | ccMDD == 1, 1, 0))
+
+
+#NSSI
+FOR$ccNSSI <- 0
+for (i in 1:10) {
+  dx_col <- paste0("cd_c_dx_", i)
+  conf_col <- paste0("cd_c_confirmed_", i)
+  text_col <- paste0("cd_c_dx_other_", i)
+  
+  rows_to_update <- FOR[[dx_col]] %in% c(84) & FOR[[conf_col]] != 0 
+  FOR$ccNSSI[rows_to_update] <- 1
+}
